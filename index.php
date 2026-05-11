@@ -1,3 +1,75 @@
+<?php
+
+// connection with database 
+$conn = mysqli_connect("localhost", "root", "", "mining-db");
+
+// check connection 
+if (!$conn) {
+    die("not connected");
+}
+
+// Get settings
+$data = mysqli_query($conn, "SELECT * FROM `settings` LIMIT 1");
+$data = mysqli_fetch_assoc($data);
+
+// SIGNUP LOGIC=
+if (isset($_POST['signup_btn'])) {
+    echo "Button clicked";
+    $name = mysqli_real_escape_string($conn, $_POST['name']);
+    $email = mysqli_real_escape_string($conn, $_POST['email']);
+    $password = mysqli_real_escape_string($conn, $_POST['password']);
+
+    // Check if email already exists
+    $check_email = mysqli_query($conn, "SELECT * FROM `users` WHERE `email` = '$email'");
+    if (mysqli_num_rows($check_email) > 0) {
+        echo "<script> alert('Email already registered!')</script>";
+    } else {
+        $insert = mysqli_query($conn, "INSERT INTO `users` (`name`, `email`, `password`) VALUES ('$name', '$email', '$password')");
+        if ($insert) {
+            echo "<script> alert('Account created successfully!')</script>";
+            header("Location: index.php");
+
+        } else {
+            // Error handling without alert
+            echo $insert;
+        }
+
+
+    }
+}
+
+// LOGIN LOGIC
+if (isset($_POST['login_btn'])) {
+    $email = mysqli_real_escape_string($conn, $_POST['email']);
+    $password = mysqli_real_escape_string($conn, $_POST['password']);
+
+    $result = mysqli_query($conn, "SELECT * FROM `users` WHERE `email` = '$email' AND `password` = '$password'");
+    if (mysqli_num_rows($result) > 0) {
+        $user = mysqli_fetch_assoc($result);
+
+
+        if ($user['is-active'] == 0) {
+            echo "<script> alert('Your account is not active!Please contact admin.')</script>";
+
+        } else {
+            setcookie("uid", $user['id'], time() + 86400, "/");
+            setcookie("name", $user['name'], time() + 86400, "/");
+
+            // update last login time
+            $update = mysqli_query($conn, "UPDATE `users` SET `last-login` = NOW() WHERE `id` = '$user[id]'");
+
+            header("Location: dashboard.php");
+            exit();
+        }
+
+
+    } else {
+        echo "<script> alert('Invalid email or password!')</script>";
+    }
+}
+
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -332,12 +404,15 @@
 
     <!-- HEADER -->
     <div class="header">
-        <div class="logo"><i class="fa-solid fa-c"></i> DashBoard</div>
+        <div class="logo"><i class="fa-solid fa-c"></i>
+            <img src="<?php echo $data['logo-path']; ?>" alt="" srcset="" style="width:40px; height: 40px;">
+            <?php echo $data['tittle'] ?>
+        </div>
         <div class="nav">
-            <a href="#">Home</a>
-            <a href="#">Login</a>
-            <a href="#">Signup</a>
-            <a href="#">Contact Us</a>
+            <a href="index.html">Home</a>
+            <a href="dashboard.html">Dashboard</a>
+            <a href="profile.html">Profile</a>
+            <a href="contactus.php">Contact Us</a>
         </div>
     </div>
 
@@ -353,6 +428,7 @@
         </div>
         <div class="hero-img">
             <img src="src/machine2.png">
+
         </div>
     </div>
 
@@ -515,9 +591,11 @@
         <div class="modal-content">
             <span class="close" onclick="closeModal('loginModal')">&times;</span>
             <h2>Login</h2>
-            <input type="text" placeholder="Email">
-            <input type="password" placeholder="Password">
-            <button onclick="loginUser()">Login</button>
+            <form action="" method="POST">
+                <input type="text" name="email" placeholder="Email" required>
+                <input type="password" name="password" placeholder="Password" required>
+                <button type="submit" name="login_btn">Login</button>
+            </form>
         </div>
     </div>
 
@@ -526,10 +604,12 @@
         <div class="modal-content">
             <span class="close" onclick="closeModal('signupModal')">&times;</span>
             <h2>Signup</h2>
-            <input type="text" placeholder="Name">
-            <input type="text" placeholder="Email">
-            <input type="password" placeholder="Password">
-            <button>Signup</button>
+            <form action="" method="POST">
+                <input type="text" name="name" placeholder="Name" required>
+                <input type="email" name="email" placeholder="Email" required>
+                <input type="password" name="password" placeholder="Password" required>
+                <button type="submit" name="signup_btn">Signup</button>
+            </form>
         </div>
     </div>
 
@@ -595,11 +675,6 @@
 
         function closeModal(id) {
             document.getElementById(id).style.display = 'none';
-        }
-
-        // login redirect
-        function loginUser() {
-            window.location.href = 'dashboard.html';
         }
 
         // close on outside click
