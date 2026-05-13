@@ -556,6 +556,144 @@ if (isset($_POST['contact_btn'])) {
         </div>
     </div>
 
+    <!-- FOLLOW US POPUP (For contactus.php) -->
+    <div id="followPopup" class="popup-overlay">
+        <div class="popup-content">
+            <button onclick="closeFollowPopup()" class="close-btn"><i class="fa-solid fa-xmark"></i></button>
+            <div class="popup-icon">
+                <i class="fa-solid fa-gift"></i>
+            </div>
+            <h3 class="popup-title">Follow Us & Get 5% Discount!</h3>
+            <p class="popup-desc">Complete this task by following our social media channels to claim your 5% discount.</p>
+            
+            <div class="popup-social">
+                <a href="#" class="fb"><i class="fa-brands fa-facebook"></i></a>
+                <a href="#" class="tg"><i class="fa-brands fa-telegram"></i></a>
+                <a href="#" class="wa"><i class="fa-brands fa-whatsapp"></i></a>
+                <a href="#" class="yt"><i class="fa-brands fa-youtube"></i></a>
+            </div>
+            
+            <button onclick="closeFollowPopup()" class="popup-close-btn">Maybe Later</button>
+        </div>
+    </div>
+
+    <style>
+    .popup-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.6);
+        display: none;
+        align-items: center;
+        justify-content: center;
+        z-index: 3000;
+        padding: 20px;
+    }
+    .popup-content {
+        background: #fff;
+        border-radius: 20px;
+        padding: 30px;
+        max-width: 400px;
+        width: 100%;
+        text-align: center;
+        position: relative;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        animation: popupFadeIn 0.3s ease-out forwards;
+    }
+    @keyframes popupFadeIn {
+        from { opacity: 0; transform: translateY(-20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    .close-btn {
+        position: absolute;
+        top: 15px;
+        right: 15px;
+        background: none;
+        border: none;
+        font-size: 20px;
+        color: #999;
+        cursor: pointer;
+        transition: color 0.2s;
+    }
+    .close-btn:hover { color: #333; }
+    .popup-icon {
+        width: 60px;
+        height: 60px;
+        background: #e8f5e9;
+        color: #2e7d32;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 28px;
+        margin: 0 auto 15px;
+    }
+    .popup-title {
+        font-size: 22px;
+        color: #0b3d2e;
+        margin-bottom: 10px;
+        font-weight: bold;
+    }
+    .popup-desc {
+        font-size: 14px;
+        color: #666;
+        margin-bottom: 25px;
+        line-height: 1.5;
+    }
+    .popup-social {
+        display: flex;
+        justify-content: center;
+        gap: 15px;
+        margin-bottom: 25px;
+    }
+    .popup-social a {
+        width: 45px;
+        height: 45px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #fff;
+        font-size: 20px;
+        text-decoration: none;
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .popup-social a:hover { transform: scale(1.1); box-shadow: 0 5px 15px rgba(0,0,0,0.2); }
+    .popup-social .fb { background: #1877f2; }
+    .popup-social .tg { background: #0088cc; }
+    .popup-social .wa { background: #25d366; }
+    .popup-social .yt { background: #ff0000; }
+    .popup-close-btn {
+        width: 100%;
+        padding: 12px;
+        background: #f0f0f0;
+        color: #555;
+        border: none;
+        border-radius: 10px;
+        font-size: 15px;
+        font-weight: bold;
+        cursor: pointer;
+        transition: background 0.2s;
+    }
+    .popup-close-btn:hover { background: #e0e0e0; }
+    </style>
+
+    <script>
+        window.addEventListener('DOMContentLoaded', (event) => {
+            document.getElementById('followPopup').style.display = 'flex';
+        });
+        function closeFollowPopup() {
+            document.getElementById('followPopup').style.display = 'none';
+        }
+        window.addEventListener('click', function(event) {
+            let followModal = document.getElementById('followPopup');
+            if (event.target == followModal) {
+                followModal.style.display = "none";
+            }
+        });
+    </script>
 </body>
 
 </html>

@@ -6,15 +6,29 @@ if (isset($_POST['logout-btn'])) {
     exit();
 }
 
-// Cookie check - isset() se check karo
-$uid  = isset($_COOKIE["uid"])  ? $_COOKIE["uid"]  : "";
-$name = isset($_COOKIE["name"]) ? $_COOKIE["name"] : "";
+// connection with database 
+$conn = mysqli_connect("localhost", "root", "", "mining-db");
+
+// check connection 
+if (!$conn) {
+    die("not connected");
+}
+
+// Cookie check
+$uid = isset($_COOKIE["uid"]) ? $_COOKIE["uid"] : "";
 
 // Agar login nahi hy to index.php par bhejo
 if (!$uid) {
     header("Location: index.php");
     exit();
 }
+
+$profile = mysqli_query($conn, "SELECT * FROM users WHERE id = '$uid'");
+$data = mysqli_fetch_assoc($profile);
+
+$deposits_query = mysqli_query($conn, "SELECT * FROM `total-deposit` WHERE uid = '$uid' ORDER BY id DESC LIMIT 5");
+$withdraws_query = mysqli_query($conn, "SELECT * FROM `total-withdraw` WHERE uid = '$uid' ORDER BY id DESC LIMIT 5");
+
 ?>
 
 
@@ -169,15 +183,15 @@ if (!$uid) {
 
             <div>
                 <h2 class="text-4xl font-bold" style="color:lime">
-                    <span style="color:green">Welcome</span> <?php echo $name; ?>
+                    <span>Welcome</span> <?php echo $data['name']; ?>
                 </h2>
                 <h2 class="text-4xl font-bold main-green">Earn Every Day With Mining</h2>
                 <p class="text-gray-500 mt-2">Your Balance</p>
                 <h1 class="text-5xl font-bold main-green">50 USD</h1>
 
                 <div class="flex gap-4 mt-6">
-                    <a href="deposit.html" class="btn-main px-6 py-3 text-center">Deposit</a>
-                    <a href="withdraw.html" class="btn-outline px-6 py-3 text-center">Withdraw</a>
+                    <a href="deposit.php" class="btn-main px-6 py-3 text-center">Deposit</a>
+                    <a href="withdraw.php" class="btn-outline px-6 py-3 text-center">Withdraw</a>
                 </div>
             </div>
 
@@ -212,25 +226,27 @@ if (!$uid) {
 
             <div class="card p-5 text-center">
                 <img src="src/btc-wallet.png" alt="">
-                <p class="text-xl font-bold main-green">50 USD</p>
+                <p class="text-xl font-bold main-green"> <?php echo $data['deposit'] ?? 0; ?> USD</p>
                 <p class="text-sm text-gray-500">Total Deposit</p>
             </div>
 
             <div class="card p-5 text-center">
                 <img src="src/deposit.png" alt="">
-                <p class="text-xl font-bold main-green">10 USD</p>
+                <p class="text-xl font-bold main-green">
+                    <?php echo $data['withdraw'] ?? 0; ?> USD
+                </p>
                 <p class="text-sm text-gray-500">Total Withdrawal</p>
             </div>
 
             <div class="card p-5 text-center">
                 <img src="src/users.png" alt="">
-                <p class="text-xl font-bold main-green">10</p>
+                <p class="text-xl font-bold main-green"><?php echo $data['referrals'] ?? 0; ?></p>
                 <p class="text-sm text-gray-500">Referrals</p>
             </div>
 
             <div class="card p-5 text-center">
                 <img src="src/percantage.png" alt="">
-                <p class="text-xl font-bold main-green">10 USD</p>
+                <p class="text-xl font-bold main-green"><?php echo $data['refer_earn'] ?? 0; ?> USD</p>
                 <p class="text-sm text-gray-500">Refer Earn</p>
             </div>
 
@@ -272,12 +288,23 @@ if (!$uid) {
                         <th>Date</th>
                         <th>Status</th>
                     </tr>
-                    <tr>
-
-                        <td class="p-3">50 USD</td>
-                        <td>20 May</td>
-                        <td class="text-green-600">Success</td>
-                    </tr>
+                    <?php
+                    if ($deposits_query && mysqli_num_rows($deposits_query) > 0) {
+                        while ($dep = mysqli_fetch_assoc($deposits_query)) {
+                            ?>
+                            <tr>
+                                <td class="p-3"><?php echo $dep['amount']; ?> USD</td>
+                                <td><?php echo $dep['date']; ?></td>
+                                <td class="text-green-600"><?php echo $dep['status']; ?></td>
+                            </tr>
+                            <?php
+                        }
+                    } else {
+                        ?>
+                        <tr>
+                            <td colspan="3" class="p-3 text-center text-gray-500">No recent deposits</td>
+                        </tr>
+                    <?php } ?>
                 </table>
             </div>
 
@@ -289,15 +316,68 @@ if (!$uid) {
                         <th>Date</th>
                         <th>Status</th>
                     </tr>
-                    <tr>
-                        <td class="p-3">10 USD</td>
-                        <td>21 May</td>
-                        <td class="text-green-600">Success</td>
-                    </tr>
+                    <?php
+                    if ($withdraws_query && mysqli_num_rows($withdraws_query) > 0) {
+                        while ($wit = mysqli_fetch_assoc($withdraws_query)) {
+                            ?>
+                            <tr>
+                                <td class="p-3"><?php echo $wit['amount']; ?> USD</td>
+                                <td><?php echo $wit['date']; ?></td>
+                                <td class="text-green-600"><?php echo $wit['status']; ?></td>
+                            </tr>
+                            <?php
+                        }
+                    } else {
+                        ?>
+                        <tr>
+                            <td colspan="3" class="p-3 text-center text-gray-500">No recent withdrawals</td>
+                        </tr>
+                    <?php } ?>
                 </table>
             </div>
 
         </div>
+
+        <!-- REFERRAL SECTION -->
+        <div class="bg-white rounded-2xl shadow-lg p-6 mt-10 flex flex-col md:flex-row justify-between items-center gap-6"
+            style="background: linear-gradient(135deg, #e8f5e9, #ffffff);">
+            <div class="flex items-center gap-6">
+                <div
+                    class="w-16 h-16 bg-green-100 text-green-700 rounded-full flex items-center justify-center text-3xl shadow-sm">
+                    <i class="fa-solid fa-users"></i>
+                </div>
+                <div>
+                    <h2 class="text-2xl font-bold main-green mb-1">Refer & Earn</h2>
+                    <div class="flex items-baseline gap-2">
+                        <span class="text-3xl font-bold text-green-600">30%</span>
+                        <span class="text-gray-500 font-medium">Per Referral On Every Deposit</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="w-full md:w-auto flex-1 max-w-md">
+                <p class="text-sm text-gray-500 mb-2 font-bold uppercase tracking-wide">Your Referral Link:</p>
+                <div class="flex shadow-sm rounded-xl overflow-hidden border border-gray-200">
+                    <input type="text" readonly value="http://localhost/mining/index.php?ref=<?php echo $uid; ?>"
+                        id="refLink"
+                        class="w-full bg-white text-gray-700 py-3 px-4 outline-none focus:bg-gray-50 transition">
+                    <button onclick="copyReferralLink()"
+                        class="bg-green-700 hover:bg-green-800 text-white px-6 font-bold transition flex items-center gap-2">
+                        <i class="fa-solid fa-copy"></i> Copy
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <script>
+            function copyReferralLink() {
+                var copyText = document.getElementById("refLink");
+                copyText.select();
+                copyText.setSelectionRange(0, 99999);
+                navigator.clipboard.writeText(copyText.value);
+                alert("Referral link copied!");
+            }
+        </script>
 
         <!-- FOLLOW US SECTION -->
         <div style="
@@ -312,7 +392,8 @@ if (!$uid) {
             <h3 style="font-size: 20px; font-weight: bold; margin-bottom: 8px; letter-spacing: 1px;">
                 <i class="fa-solid fa-share-nodes" style="margin-right: 8px;"></i> Follow Us
             </h3>
-            <p style="font-size: 14px; color: #c8e6c9; margin-bottom: 20px;">Stay connected with us on social media for latest updates &amp; offers!</p>
+            <p style="font-size: 14px; color: #c8e6c9; margin-bottom: 20px;">Stay connected with us on social media for
+                latest updates &amp; offers!</p>
             <div style="display: flex; justify-content: center; gap: 18px; flex-wrap: wrap;">
                 <a href="#" style="
                     width: 52px; height: 52px;
@@ -323,7 +404,7 @@ if (!$uid) {
                     text-decoration: none;
                     transition: background 0.3s, transform 0.2s;
                 " onmouseover="this.style.background='rgba(255,255,255,0.4)';this.style.transform='translateY(-4px)'"
-                   onmouseout="this.style.background='rgba(255,255,255,0.2)';this.style.transform='translateY(0)'">
+                    onmouseout="this.style.background='rgba(255,255,255,0.2)';this.style.transform='translateY(0)'">
                     <i class="fa-brands fa-facebook"></i>
                 </a>
                 <a href="#" style="
@@ -335,7 +416,7 @@ if (!$uid) {
                     text-decoration: none;
                     transition: background 0.3s, transform 0.2s;
                 " onmouseover="this.style.background='rgba(255,255,255,0.4)';this.style.transform='translateY(-4px)'"
-                   onmouseout="this.style.background='rgba(255,255,255,0.2)';this.style.transform='translateY(0)'">
+                    onmouseout="this.style.background='rgba(255,255,255,0.2)';this.style.transform='translateY(0)'">
                     <i class="fa-brands fa-telegram"></i>
                 </a>
                 <a href="#" style="
@@ -347,7 +428,7 @@ if (!$uid) {
                     text-decoration: none;
                     transition: background 0.3s, transform 0.2s;
                 " onmouseover="this.style.background='rgba(255,255,255,0.4)';this.style.transform='translateY(-4px)'"
-                   onmouseout="this.style.background='rgba(255,255,255,0.2)';this.style.transform='translateY(0)'">
+                    onmouseout="this.style.background='rgba(255,255,255,0.2)';this.style.transform='translateY(0)'">
                     <i class="fa-brands fa-whatsapp"></i>
                 </a>
                 <a href="#" style="
@@ -359,7 +440,7 @@ if (!$uid) {
                     text-decoration: none;
                     transition: background 0.3s, transform 0.2s;
                 " onmouseover="this.style.background='rgba(255,255,255,0.4)';this.style.transform='translateY(-4px)'"
-                   onmouseout="this.style.background='rgba(255,255,255,0.2)';this.style.transform='translateY(0)'">
+                    onmouseout="this.style.background='rgba(255,255,255,0.2)';this.style.transform='translateY(0)'">
                     <i class="fa-brands fa-youtube"></i>
                 </a>
             </div>
@@ -367,6 +448,59 @@ if (!$uid) {
 
     </div>
 
+    <!-- FOLLOW US POPUP -->
+    <div id="followPopup" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-[3000] p-4">
+        <div class="bg-white rounded-2xl p-8 max-w-md w-full text-center shadow-2xl animate-fade-in relative">
+            <button onclick="closeFollowPopup()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-700">
+                <i class="fa-solid fa-xmark text-2xl"></i>
+            </button>
+            <div
+                class="w-16 h-16 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-4 text-3xl">
+                <i class="fa-solid fa-gift"></i>
+            </div>
+            <h3 class="text-2xl font-bold text-gray-800 mb-2">Follow Us & Get 5% Discount!</h3>
+            <p class="text-gray-500 mb-6">Complete this task by following our social media channels to claim your 5%
+                discount.</p>
+
+            <div class="flex justify-center gap-4 flex-wrap">
+                <a href="#"
+                    class="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center text-white text-xl hover:scale-110 transition shadow-lg"><i
+                        class="fa-brands fa-facebook"></i></a>
+                <a href="#"
+                    class="w-12 h-12 bg-blue-400 rounded-full flex items-center justify-center text-white text-xl hover:scale-110 transition shadow-lg"><i
+                        class="fa-brands fa-telegram"></i></a>
+                <a href="#"
+                    class="w-12 h-12 bg-green-500 rounded-full flex items-center justify-center text-white text-xl hover:scale-110 transition shadow-lg"><i
+                        class="fa-brands fa-whatsapp"></i></a>
+                <a href="#"
+                    class="w-12 h-12 bg-red-600 rounded-full flex items-center justify-center text-white text-xl hover:scale-110 transition shadow-lg"><i
+                        class="fa-brands fa-youtube"></i></a>
+            </div>
+
+            <button onclick="closeFollowPopup()"
+                class="mt-8 w-full py-3 bg-gray-100 text-gray-600 font-bold rounded-xl hover:bg-gray-200 transition">Maybe
+                Later</button>
+        </div>
+    </div>
+
+    <script>
+        // Show the popup automatically when page loads
+        window.addEventListener('DOMContentLoaded', (event) => {
+            document.getElementById('followPopup').style.display = 'flex';
+        });
+
+        function closeFollowPopup() {
+            document.getElementById('followPopup').style.display = 'none';
+        }
+
+        // Close modal on outside click
+        window.addEventListener('click', function (event) {
+            let followModal = document.getElementById('followPopup');
+            if (event.target == followModal) {
+                followModal.style.display = "none";
+            }
+        });
+    </script>
 </body>
 
 </html>
