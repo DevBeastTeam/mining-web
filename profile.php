@@ -238,8 +238,9 @@ $data = mysqli_fetch_assoc($profile);
             <p style="color:#777; font-size:14px;">Do you really want to logout?</p>
             <div class="modal-btns">
                 <button onclick="closeLogoutModal()" class="btn-modal btn-cancel">Cancel</button>
-                <a href="index.php" class="btn-modal btn-logout"
-                    style="text-decoration:none; display:flex; align-items:center; justify-content:center;">Logout</a>
+                <form method="POST" action="dashboard.php" style="flex:1;">
+                    <button type="submit" name="logout-btn" class="btn-modal btn-logout" style="width:100%;">Logout</button>
+                </form>
             </div>
         </div>
     </div>
@@ -293,7 +294,7 @@ $data = mysqli_fetch_assoc($profile);
                 </div>
                 <div class="info-item">
                     <label>Email Address</label>
-                    <span>user@example.com</span>
+                    <span><?php echo $data['email']; ?></span>
                 </div>
                 <div class="info-item">
                     <label>Account Created</label>

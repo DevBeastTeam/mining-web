@@ -19,6 +19,12 @@ if (!$uid) {
 $profile = mysqli_query($conn, "SELECT * FROM users WHERE id = '$uid'");
 $data = mysqli_fetch_assoc($profile);
 
+// Self-healing: Check if 'date' column exists
+$check_col = mysqli_query($conn, "SHOW COLUMNS FROM `total-withdraw` LIKE 'date'");
+if(mysqli_num_rows($check_col) == 0) {
+    mysqli_query($conn, "ALTER TABLE `total-withdraw` ADD `date` VARCHAR(50)");
+}
+
 // Handle withdrawal submission
 if(isset($_POST['submit-withdraw'])) {
     $amount = $_POST['amount'];

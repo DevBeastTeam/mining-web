@@ -24,9 +24,9 @@ if (isset($_POST['signup_btn'])) {
     if (mysqli_num_rows($check_email) > 0) {
         echo "<script> alert('Email already registered!')</script>";
     } else {
-        $insert = mysqli_query($conn, "INSERT INTO `users` (`name`, `email`, `password`) VALUES ('$name', '$email', '$password')");
+        $insert = mysqli_query($conn, "INSERT INTO `users` (`name`, `email`, `password`, `balance`, `is-active`) VALUES ('$name', '$email', '$password', '50.00', '1')");
         if ($insert) {
-            echo "<script> alert('Account created successfully!')</script>";
+            echo "<script> alert('Account created successfully! You received $50 signup bonus.')</script>";
             header("Location: index.php");
 
         } else {
@@ -409,9 +409,9 @@ if (isset($_POST['login_btn'])) {
             <?php echo $data['tittle'] ?>
         </div>
         <div class="nav">
-            <a href="index.html">Home</a>
-            <a href="dashboard.html">Dashboard</a>
-            <a href="profile.html">Profile</a>
+            <a href="index.php">Home</a>
+            <a href="dashboard.php">Dashboard</a>
+            <a href="profile.php">Profile</a>
             <a href="contactus.php">Contact Us</a>
         </div>
     </div>
@@ -422,7 +422,7 @@ if (isset($_POST['login_btn'])) {
             <h1>Earn Every Day With Mining</h1>
             <p>Start mining today and grow your future</p>
             <p>Your Balance</p>
-            <div class="balance">50 USD</div>
+            <div class="balance">Sign Up & Get 50 USD Bonus</div>
             <button class="btn login">Login</button>
             <button class="btn signup">Signup</button>
         </div>
@@ -477,7 +477,7 @@ if (isset($_POST['login_btn'])) {
     <!-- TABLES -->
     <div class="table-section">
         <div class="table-box">
-            <h3>All Users Deposits</h3>
+            <h3>Recent Deposits</h3>
             <table>
                 <tr>
                     <th>User</th>
@@ -485,23 +485,26 @@ if (isset($_POST['login_btn'])) {
                     <th>Date</th>
                     <th>Status</th>
                 </tr>
-                <tr>
-                    <td>Ali Khan</td>
-                    <td>50 USD</td>
-                    <td>20 May</td>
-                    <td class="status">Success</td>
-                </tr>
-                <tr>
-                    <td>Ahmed</td>
-                    <td>30 USD</td>
-                    <td>18 May</td>
-                    <td class="status">Success</td>
-                </tr>
+                <?php
+                $recent_deps = mysqli_query($conn, "SELECT d.*, u.name FROM `total-deposit` d JOIN users u ON d.uid = u.id WHERE d.status='Success' ORDER BY d.id DESC LIMIT 5");
+                if(mysqli_num_rows($recent_deps) > 0){
+                    while($rd = mysqli_fetch_assoc($recent_deps)){
+                        echo "<tr>
+                                <td>".$rd['name']."</td>
+                                <td>".$rd['amount']." USD</td>
+                                <td>".$rd['date']."</td>
+                                <td class='status'>".$rd['status']."</td>
+                              </tr>";
+                    }
+                } else {
+                    echo "<tr><td colspan='4' style='text-align:center; padding:20px; color:#999;'>No records found</td></tr>";
+                }
+                ?>
             </table>
         </div>
 
         <div class="table-box">
-            <h3>All Users Withdrawals</h3>
+            <h3>Recent Withdrawals</h3>
             <table>
                 <tr>
                     <th>User</th>
@@ -509,18 +512,21 @@ if (isset($_POST['login_btn'])) {
                     <th>Date</th>
                     <th>Status</th>
                 </tr>
-                <tr>
-                    <td>Shoaib</td>
-                    <td>10 USD</td>
-                    <td>21 May</td>
-                    <td class="status">Success</td>
-                </tr>
-                <tr>
-                    <td>Zain</td>
-                    <td>7 USD</td>
-                    <td>19 May</td>
-                    <td class="status">Success</td>
-                </tr>
+                <?php
+                $recent_wits = mysqli_query($conn, "SELECT w.*, u.name FROM `total-withdraw` w JOIN users u ON w.uid = u.id WHERE w.status='Success' ORDER BY w.id DESC LIMIT 5");
+                if(mysqli_num_rows($recent_wits) > 0){
+                    while($rw = mysqli_fetch_assoc($recent_wits)){
+                        echo "<tr>
+                                <td>".$rw['name']."</td>
+                                <td>".$rw['amount']." USD</td>
+                                <td>".$rw['date']."</td>
+                                <td class='status'>".$rw['status']."</td>
+                              </tr>";
+                    }
+                } else {
+                    echo "<tr><td colspan='4' style='text-align:center; padding:20px; color:#999;'>No records found</td></tr>";
+                }
+                ?>
             </table>
         </div>
     </div>

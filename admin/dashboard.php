@@ -17,6 +17,7 @@ $pending_withdraws = mysqli_fetch_assoc(mysqli_query($conn, "SELECT COUNT(*) as 
 ?>
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -25,16 +26,42 @@ $pending_withdraws = mysqli_fetch_assoc(mysqli_query($conn, "SELECT COUNT(*) as 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Outfit', sans-serif; background: #f0f4f2; }
-        .sidebar { background: #0b3d2e; }
-        .nav-link:hover { background: rgba(255,255,255,0.1); }
-        .nav-link.active { background: #1e7d57; border-left: 4px solid #ccff00; }
-        .stat-card { transition: transform 0.3s ease; }
-        .stat-card:hover { transform: translateY(-5px); }
-        .main-green { color: #0b3d2e; }
-        .bg-gradient-green { background: linear-gradient(135deg, #0b3d2e, #1e7d57); }
+        body {
+            font-family: 'Outfit', sans-serif;
+            background: #f0f4f2;
+        }
+
+        .sidebar {
+            background: #0b3d2e;
+        }
+
+        .nav-link:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .nav-link.active {
+            background: #1e7d57;
+            border-left: 4px solid #ccff00;
+        }
+
+        .stat-card {
+            transition: transform 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .main-green {
+            color: #0b3d2e;
+        }
+
+        .bg-gradient-green {
+            background: linear-gradient(135deg, #0b3d2e, #1e7d57);
+        }
     </style>
 </head>
+
 <body class="flex min-h-screen">
 
     <!-- Sidebar -->
@@ -52,14 +79,16 @@ $pending_withdraws = mysqli_fetch_assoc(mysqli_query($conn, "SELECT COUNT(*) as 
             </a>
             <a href="manage-deposits.php" class="nav-link flex items-center gap-4 px-6 py-4 transition">
                 <i class="fa-solid fa-wallet w-6"></i> Deposits
-                <?php if($pending_deposits > 0): ?>
-                    <span class="bg-red-500 text-white text-xs px-2 py-1 rounded-full ml-auto"><?php echo $pending_deposits; ?></span>
+                <?php if ($pending_deposits > 0): ?>
+                    <span
+                        class="bg-red-500 text-white text-xs px-2 py-1 rounded-full ml-auto"><?php echo $pending_deposits; ?></span>
                 <?php endif; ?>
             </a>
             <a href="manage-withdrawals.php" class="nav-link flex items-center gap-4 px-6 py-4 transition">
                 <i class="fa-solid fa-money-bill-transfer w-6"></i> Withdrawals
-                <?php if($pending_withdraws > 0): ?>
-                    <span class="bg-red-500 text-white text-xs px-2 py-1 rounded-full ml-auto"><?php echo $pending_withdraws; ?></span>
+                <?php if ($pending_withdraws > 0): ?>
+                    <span
+                        class="bg-red-500 text-white text-xs px-2 py-1 rounded-full ml-auto"><?php echo $pending_withdraws; ?></span>
                 <?php endif; ?>
             </a>
             <a href="settings.php" class="nav-link flex items-center gap-4 px-6 py-4 transition">
@@ -85,7 +114,8 @@ $pending_withdraws = mysqli_fetch_assoc(mysqli_query($conn, "SELECT COUNT(*) as 
                     <p class="font-bold text-gray-800">Admin</p>
                     <p class="text-xs text-gray-500">Super User</p>
                 </div>
-                <div class="w-12 h-12 bg-gradient-green rounded-full flex items-center justify-center text-white text-xl">
+                <div
+                    class="w-12 h-12 bg-gradient-green rounded-full flex items-center justify-center text-white text-xl">
                     <i class="fa-solid fa-user-tie"></i>
                 </div>
             </div>
@@ -157,29 +187,32 @@ $pending_withdraws = mysqli_fetch_assoc(mysqli_query($conn, "SELECT COUNT(*) as 
                         <tbody class="divide-y">
                             <?php
                             $recent_users = mysqli_query($conn, "SELECT * FROM users ORDER BY id DESC LIMIT 5");
-                            while($user = mysqli_fetch_assoc($recent_users)):
-                            ?>
-                            <tr>
-                                <td class="py-4">
-                                    <div class="flex items-center gap-3">
-                                        <div class="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center text-gray-500">
-                                            <i class="fa-solid fa-user text-xs"></i>
+                            while ($user = mysqli_fetch_assoc($recent_users)):
+                                ?>
+                                <tr>
+                                    <td class="py-4">
+                                        <div class="flex items-center gap-3">
+                                            <div
+                                                class="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center text-gray-500">
+                                                <i class="fa-solid fa-user text-xs"></i>
+                                            </div>
+                                            <div>
+                                                <p class="text-sm font-bold text-gray-800"><?php echo $user['name']; ?></p>
+                                                <p class="text-xs text-gray-500"><?php echo $user['email'] ?? 'No Email'; ?>
+                                                </p>
+                                            </div>
                                         </div>
-                                        <div>
-                                            <p class="text-sm font-bold text-gray-800"><?php echo $user['name']; ?></p>
-                                            <p class="text-xs text-gray-500"><?php echo $user['email'] ?? 'No Email'; ?></p>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td class="py-4">
-                                    <span class="px-2 py-1 bg-green-50 text-green-600 text-[10px] font-bold rounded-full uppercase">Active</span>
-                                </td>
-                                <td class="py-4 text-right">
-                                    <button class="text-gray-400 hover:text-green-600 transition">
-                                        <i class="fa-solid fa-ellipsis-vertical"></i>
-                                    </button>
-                                </td>
-                            </tr>
+                                    </td>
+                                    <td class="py-4">
+                                        <span
+                                            class="px-2 py-1 bg-green-50 text-green-600 text-[10px] font-bold rounded-full uppercase">Active</span>
+                                    </td>
+                                    <td class="py-4 text-right">
+                                        <button class="text-gray-400 hover:text-green-600 transition">
+                                            <i class="fa-solid fa-ellipsis-vertical"></i>
+                                        </button>
+                                    </td>
+                                </tr>
                             <?php endwhile; ?>
                         </tbody>
                     </table>
@@ -190,28 +223,35 @@ $pending_withdraws = mysqli_fetch_assoc(mysqli_query($conn, "SELECT COUNT(*) as 
             <div class="bg-white rounded-2xl shadow-sm p-6">
                 <div class="flex justify-between items-center mb-6">
                     <h2 class="text-xl font-bold text-gray-800">Latest Deposits</h2>
-                    <a href="manage-deposits.php" class="text-green-600 hover:underline text-sm font-medium">View All</a>
+                    <a href="manage-deposits.php" class="text-green-600 hover:underline text-sm font-medium">View
+                        All</a>
                 </div>
                 <div class="space-y-4">
                     <?php
                     $recent_deposits = mysqli_query($conn, "SELECT d.*, u.name FROM `total-deposit` d JOIN users u ON d.uid = u.id ORDER BY d.id DESC LIMIT 5");
-                    while($dep = mysqli_fetch_assoc($recent_deposits)):
-                    ?>
-                    <div class="flex items-center justify-between p-4 bg-gray-50 rounded-xl hover:bg-gray-100 transition">
-                        <div class="flex items-center gap-4">
-                            <div class="w-10 h-10 <?php echo $dep['status'] == 'Pending' ? 'bg-amber-100 text-amber-600' : 'bg-green-100 text-green-600'; ?> rounded-lg flex items-center justify-center">
-                                <i class="fa-solid fa-arrow-down-long"></i>
+                    while ($dep = mysqli_fetch_assoc($recent_deposits)):
+                        ?>
+                        <div
+                            class="flex items-center justify-between p-4 bg-gray-50 rounded-xl hover:bg-gray-100 transition">
+                            <div class="flex items-center gap-4">
+                                <div
+                                    class="w-10 h-10 <?php echo $dep['status'] == 'Pending' ? 'bg-amber-100 text-amber-600' : 'bg-green-100 text-green-600'; ?> rounded-lg flex items-center justify-center">
+                                    <i class="fa-solid fa-arrow-down-long"></i>
+                                </div>
+                                <div>
+                                    <p class="text-sm font-bold text-gray-800"><?php echo $dep['name']; ?></p>
+                                    <p class="text-xs text-gray-500"><?php echo $dep['date']; ?></p>
+                                </div>
                             </div>
-                            <div>
-                                <p class="text-sm font-bold text-gray-800"><?php echo $dep['name']; ?></p>
-                                <p class="text-xs text-gray-500"><?php echo $dep['date']; ?></p>
+                            <div class="text-right">
+                                <p class="text-sm font-bold text-gray-800">+$<?php echo number_format($dep['amount'], 2); ?>
+                                </p>
+                                <p
+                                    class="text-[10px] font-bold uppercase <?php echo $dep['status'] == 'Pending' ? 'text-amber-500' : 'text-green-500'; ?>">
+                                    <?php echo $dep['status']; ?>
+                                </p>
                             </div>
                         </div>
-                        <div class="text-right">
-                            <p class="text-sm font-bold text-gray-800">+$<?php echo number_format($dep['amount'], 2); ?></p>
-                            <p class="text-[10px] font-bold uppercase <?php echo $dep['status'] == 'Pending' ? 'text-amber-500' : 'text-green-500'; ?>"><?php echo $dep['status']; ?></p>
-                        </div>
-                    </div>
                     <?php endwhile; ?>
                 </div>
             </div>
@@ -219,4 +259,5 @@ $pending_withdraws = mysqli_fetch_assoc(mysqli_query($conn, "SELECT COUNT(*) as 
     </div>
 
 </body>
+
 </html>

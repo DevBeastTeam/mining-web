@@ -29,6 +29,41 @@ $data = mysqli_fetch_assoc($profile);
 $deposits_query = mysqli_query($conn, "SELECT * FROM `total-deposit` WHERE uid = '$uid' ORDER BY id DESC LIMIT 5");
 $withdraws_query = mysqli_query($conn, "SELECT * FROM `total-withdraw` WHERE uid = '$uid' ORDER BY id DESC LIMIT 5");
 
+// INVEST LOGIC
+if(isset($_POST['invest_btn'])){
+    $amount = mysqli_real_escape_string($conn, $_POST['invest_amount']);
+    if($data['balance'] >= $amount && $amount >= 5){
+        $new_balance = $data['balance'] - $amount;
+        mysqli_query($conn, "UPDATE users SET balance = '$new_balance' WHERE id = '$uid'");
+        echo "<script>alert('Investment of $amount USD started successfully!')</script>";
+        header("Refresh:0");
+    } else {
+        echo "<script>alert('Insufficient balance or invalid amount! (Min $5)')</script>";
+    }
+}
+
+// BETTING LOGIC
+if(isset($_POST['bet_btn'])){
+    $amount = mysqli_real_escape_string($conn, $_POST['bet_amount']);
+    $choice = $_POST['bet_choice']; // Head or Tail
+    
+    if($data['balance'] >= $amount && $amount >= 1){
+        $win = rand(0, 1); // 0 = Loss, 1 = Win
+        if($win == 1){
+            $new_balance = $data['balance'] + $amount; // Win 200% (original + equal profit)
+            mysqli_query($conn, "UPDATE users SET balance = '$new_balance' WHERE id = '$uid'");
+            echo "<script>alert('Congratulations! You won $amount USD in Head & Tail!')</script>";
+        } else {
+            $new_balance = $data['balance'] - $amount;
+            mysqli_query($conn, "UPDATE users SET balance = '$new_balance' WHERE id = '$uid'");
+            echo "<script>alert('Oops! You lost $amount USD. Better luck next time!')</script>";
+        }
+        header("Refresh:0");
+    } else {
+        echo "<script>alert('Insufficient balance or invalid amount! (Min $1)')</script>";
+    }
+}
+
 ?>
 
 
@@ -187,7 +222,7 @@ $withdraws_query = mysqli_query($conn, "SELECT * FROM `total-withdraw` WHERE uid
                 </h2>
                 <h2 class="text-4xl font-bold main-green">Earn Every Day With Mining</h2>
                 <p class="text-gray-500 mt-2">Your Balance</p>
-                <h1 class="text-5xl font-bold main-green">50 USD</h1>
+                <h1 class="text-5xl font-bold main-green"><?php echo number_format($data['balance'], 2); ?> USD</h1>
 
                 <div class="flex gap-4 mt-6">
                     <a href="deposit.php" class="btn-main px-6 py-3 text-center">Deposit</a>
@@ -261,9 +296,10 @@ $withdraws_query = mysqli_query($conn, "SELECT * FROM `total-withdraw` WHERE uid
 
                 <img src="src/machine2.png" class="mx-auto my-6 w-52">
 
-                <input type="text" value="50" class="w-full border p-3 rounded-lg mb-4">
-
-                <button class="btn-main w-full py-3">Invest Now</button>
+                <form method="POST">
+                    <input type="number" name="invest_amount" value="50" min="5" class="w-full border p-3 rounded-lg mb-4">
+                    <button type="submit" name="invest_btn" class="btn-main w-full py-3">Invest Now</button>
+                </form>
             </div>
 
             <div class="card p-6 text-center">
@@ -272,7 +308,20 @@ $withdraws_query = mysqli_query($conn, "SELECT * FROM `total-withdraw` WHERE uid
 
                 <img src="src/head-tail.png" class="mx-auto my-6 w-40">
 
-                <button class="btn-main w-full py-3">Play Now</button>
+                <form method="POST">
+                    <div class="flex gap-4 mb-4">
+                        <label class="flex-1 border p-3 rounded-lg cursor-pointer hover:bg-green-50 transition">
+                            <input type="radio" name="bet_choice" value="Head" checked class="hidden">
+                            <span class="font-bold">HEAD</span>
+                        </label>
+                        <label class="flex-1 border p-3 rounded-lg cursor-pointer hover:bg-green-50 transition">
+                            <input type="radio" name="bet_choice" value="Tail" class="hidden">
+                            <span class="font-bold">TAIL</span>
+                        </label>
+                    </div>
+                    <input type="number" name="bet_amount" value="10" min="1" class="w-full border p-3 rounded-lg mb-4">
+                    <button type="submit" name="bet_btn" class="btn-main w-full py-3">Play Now</button>
+                </form>
             </div>
 
         </div>
